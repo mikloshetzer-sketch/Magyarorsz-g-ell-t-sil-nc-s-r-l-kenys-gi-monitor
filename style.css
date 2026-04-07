@@ -6,9 +6,13 @@
 }
 
 /* ALAPOK */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background-color: #0f172a;
+  background-color: #020b1c;
   color: #e5e7eb;
   line-height: 1.6;
 }
@@ -17,40 +21,44 @@ body {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px;
 }
 
 /* HEADER */
 .site-header {
   background: #020617;
   border-bottom: 1px solid #1f2937;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .topbar h1 {
-  font-size: 28px;
-  margin-bottom: 5px;
+  font-size: 30px;
+  margin-bottom: 6px;
+  color: #f8fafc;
 }
 
 .subtitle {
-  color: #9ca3af;
+  color: #94a3b8;
   font-size: 14px;
 }
 
 /* NAV */
 .main-nav {
-  margin-top: 15px;
+  margin-top: 16px;
   display: flex;
-  gap: 15px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .main-nav a {
   text-decoration: none;
-  color: #cbd5f5;
+  color: #cbd5e1;
   font-size: 14px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: 0.2s;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .main-nav a:hover {
@@ -60,7 +68,7 @@ body {
 
 /* HERO */
 .hero {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .hero-box {
@@ -71,144 +79,277 @@ body {
 
 .hero-text {
   flex: 2;
+  min-width: 300px;
 }
 
 .hero-text h2 {
   margin-bottom: 10px;
+  color: #f8fafc;
+}
+
+.hero-text p {
+  margin-bottom: 12px;
 }
 
 .hero-side {
   flex: 1;
+  min-width: 260px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .info-card {
   background: #1e293b;
-  padding: 15px;
-  border-radius: 10px;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 .info-card.highlight {
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
 .info-card .label {
+  display: block;
   font-size: 12px;
-  color: #cbd5f5;
+  color: #dbeafe;
+  margin-bottom: 6px;
 }
 
 /* SECTION */
 .section {
-  margin-top: 40px;
+  margin-top: 42px;
 }
 
 .alt-bg {
-  background: #020617;
+  background: #07152e;
   border-top: 1px solid #1f2937;
   border-bottom: 1px solid #1f2937;
 }
 
 .section-header {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .section-header h2 {
-  margin-bottom: 5px;
+  margin-bottom: 6px;
+  color: #f8fafc;
+}
+
+.section-header p {
+  color: #cbd5e1;
 }
 
 /* METRIC CARDS */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
+  gap: 16px;
 }
 
 .metric-card {
   background: #1e293b;
   padding: 20px;
-  border-radius: 12px;
-  transition: 0.2s;
+  border-radius: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
 
 .metric-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
 .metric-title {
   font-size: 13px;
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 .metric-value {
-  font-size: 32px;
-  font-weight: bold;
+  font-size: 34px;
+  font-weight: 700;
   margin: 10px 0;
 }
 
 .metric-note {
   font-size: 13px;
-  color: #cbd5f5;
+  color: #cbd5e1;
 }
 
 /* SECTOR */
 .sector-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
+  gap: 16px;
 }
 
 .sector-card {
   background: #1e293b;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
 
 .sector-card h3 {
   margin-bottom: 10px;
+  color: #f8fafc;
 }
 
-/* MAP */
-.map-placeholder {
+/* MAP DASHBOARD */
+.map-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.map-panel {
   background: #1e293b;
-  border-radius: 12px;
-  padding: 40px;
-  text-align: center;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 520px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
 }
 
-.map-inner h3 {
-  margin-bottom: 10px;
+#hungary-map {
+  width: 100%;
+  height: 520px;
+  min-height: 520px;
+  display: block;
+  background: #0f172a;
+}
+
+.map-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.map-info-card {
+  background: #1e293b;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.map-info-label {
+  display: block;
+  font-size: 12px;
+  color: #93c5fd;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.map-info-card h3 {
+  color: #f8fafc;
+  margin-bottom: 8px;
+}
+
+.map-list {
+  padding-left: 18px;
+}
+
+.map-list li {
+  margin-bottom: 6px;
+  color: #e2e8f0;
+}
+
+/* LEAFLET FINOMHANGOLÁS */
+.leaflet-container {
+  font-family: inherit;
+  background: #0f172a;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #ffffff;
+  color: #111827;
+}
+
+.leaflet-control-attribution {
+  font-size: 11px;
 }
 
 /* STRESS */
 .stress-layout {
   display: flex;
-  gap: 15px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .stress-box {
   background: #1e293b;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 14px;
   flex: 1;
-  min-width: 200px;
+  min-width: 220px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stress-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.stress-box h3 {
+  color: #f8fafc;
+  margin-bottom: 8px;
 }
 
 /* METHOD */
 .method-box {
   background: #1e293b;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.method-box p + p {
+  margin-top: 12px;
 }
 
 /* FOOTER */
 .site-footer {
-  margin-top: 40px;
+  margin-top: 42px;
   background: #020617;
   border-top: 1px solid #1f2937;
   text-align: center;
   font-size: 13px;
-  color: #9ca3af;
+  color: #94a3b8;
+}
+
+/* RESZPONZÍV */
+@media (max-width: 900px) {
+  .map-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .map-panel,
+  #hungary-map {
+    min-height: 420px;
+    height: 420px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 18px;
+  }
+
+  .topbar h1 {
+    font-size: 24px;
+  }
+
+  .metric-value {
+    font-size: 28px;
+  }
+
+  .map-panel,
+  #hungary-map {
+    min-height: 360px;
+    height: 360px;
+  }
 }
