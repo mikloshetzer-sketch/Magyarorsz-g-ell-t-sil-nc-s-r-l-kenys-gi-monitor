@@ -17,10 +17,9 @@ const scenarios = {
   }
 };
 
-// ===== DOM ELEMEK =====
+// ===== STRESSZTESZT =====
 const stressBoxes = document.querySelectorAll(".stress-box");
 
-// ===== STRESSZTESZT INTERAKCIÓ =====
 function updateStressTest(scenarioKey) {
   const scenario = scenarios[scenarioKey];
 
@@ -29,7 +28,6 @@ function updateStressTest(scenarioKey) {
   stressBoxes[2].querySelector("p").textContent = scenario.erintett;
 }
 
-// ===== KATTINTHATÓ STRESSZ BLOKKOK =====
 stressBoxes.forEach((box, index) => {
   box.style.cursor = "pointer";
 
@@ -47,15 +45,15 @@ metrics.forEach(metric => {
   const value = parseInt(metric.textContent);
 
   if (value >= 75) {
-    metric.style.color = "#ef4444"; // piros
+    metric.style.color = "#ef4444";
   } else if (value >= 60) {
-    metric.style.color = "#f59e0b"; // narancs
+    metric.style.color = "#f59e0b";
   } else {
-    metric.style.color = "#22c55e"; // zöld
+    metric.style.color = "#22c55e";
   }
 });
 
-// ===== SIMA SCROLL NAV =====
+// ===== SMOOTH SCROLL =====
 document.querySelectorAll(".main-nav a").forEach(anchor => {
   anchor.addEventListener("click", function(e) {
     e.preventDefault();
@@ -69,3 +67,62 @@ document.querySelectorAll(".main-nav a").forEach(anchor => {
     });
   });
 });
+
+// ===== TÉRKÉP INITIALIZÁLÁS =====
+
+// Ellenőrizzük, hogy létezik-e a térkép elem
+const mapElement = document.getElementById("hungary-map");
+
+if (mapElement) {
+  // Magyarország középpont
+  const map = L.map("hungary-map").setView([47.1625, 19.5033], 7);
+
+  // Alaptérkép (OpenStreetMap)
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+
+  // ===== LOGISZTIKAI PONTOK =====
+  const locations = [
+    {
+      name: "Budapest",
+      coords: [47.4979, 19.0402],
+      desc: "Országos logisztikai és elosztási központ"
+    },
+    {
+      name: "Győr",
+      coords: [47.6875, 17.6504],
+      desc: "Autóipari központ és nyugati kapcsolat"
+    },
+    {
+      name: "Debrecen",
+      coords: [47.5316, 21.6273],
+      desc: "Új ipari és beszállítói bázis"
+    },
+    {
+      name: "Kecskemét",
+      coords: [46.8964, 19.6897],
+      desc: "Járműipari integráció"
+    },
+    {
+      name: "Záhony",
+      coords: [48.4047, 22.1767],
+      desc: "Keleti logisztikai kapu"
+    }
+  ];
+
+  const nameEl = document.getElementById("location-name");
+  const descEl = document.getElementById("location-description");
+
+  // Markerek létrehozása
+  locations.forEach(loc => {
+    const marker = L.marker(loc.coords).addTo(map);
+
+    marker.bindPopup(`<b>${loc.name}</b><br>${loc.desc}`);
+
+    marker.on("click", () => {
+      nameEl.textContent = loc.name;
+      descEl.textContent = loc.desc;
+    });
+  });
+}
