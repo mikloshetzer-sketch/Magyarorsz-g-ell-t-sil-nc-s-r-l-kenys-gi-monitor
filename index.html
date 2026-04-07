@@ -6,6 +6,14 @@
   <title>Magyarország ellátásilánc-sérülékenységi monitor</title>
   <meta name="description" content="Interaktív dashboard Magyarország ellátási láncainak sérülékenységéről." />
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
 </head>
 <body>
   <header class="site-header">
@@ -141,17 +149,49 @@
       <div class="container">
         <div class="section-header">
           <h2>Logisztikai és területi nézet</h2>
-          <p>Itt később interaktív térképet fogunk elhelyezni.</p>
+          <p>
+            Interaktív térkép Magyarország főbb ipari és logisztikai csomópontjaival.
+            A következő lépésekben megyeszintű vagy GeoJSON-alapú nézettel bővíthető.
+          </p>
         </div>
 
-        <div class="map-placeholder">
-          <div class="map-inner">
-            <h3>Térkép helye</h3>
-            <p>
-              Később ide kerülhet Magyarország megyékre bontott nézete,
-              logisztikai csomópontokkal, ipari tengelyekkel és fő szállítási folyosókkal.
-            </p>
+        <div class="map-dashboard">
+          <div class="map-panel">
+            <div id="hungary-map"></div>
           </div>
+
+          <aside class="map-info-panel">
+            <div class="map-info-card">
+              <span class="map-info-label">Kiválasztott helyszín</span>
+              <h3 id="location-name">Magyarország</h3>
+              <p id="location-description">
+                Kattints egy jelölőre a térképen, és itt megjelenik az adott logisztikai vagy ipari csomópont rövid értékelése.
+              </p>
+            </div>
+
+            <div class="map-info-card">
+              <span class="map-info-label">Fókuszpontok</span>
+              <ul class="map-list">
+                <li>Budapest – országos elosztási központ</li>
+                <li>Győr – autóipari és nyugati kapcsolat</li>
+                <li>Debrecen – új ipari és beszállítói bázis</li>
+                <li>Kecskemét – járműipari integráció</li>
+                <li>Záhony – keleti logisztikai kapu</li>
+              </ul>
+            </div>
+
+            <div class="map-info-card">
+              <span class="map-info-label">Későbbi bővítés</span>
+              <p>
+                Következő körben a térkép kiegészíthető:
+              </p>
+              <ul class="map-list">
+                <li>megyei kockázati színezéssel,</li>
+                <li>régiós sérülékenységi pontszámokkal,</li>
+                <li>vasúti, közúti és ipari rétegekkel.</li>
+              </ul>
+            </div>
+          </aside>
         </div>
       </div>
     </section>
@@ -206,6 +246,13 @@
       <p>Projektverzió: 1.0 | Készítve GitHub Pages publikálásra</p>
     </div>
   </footer>
+
+  <!-- Leaflet -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
 
   <script src="script.js"></script>
 </body>
