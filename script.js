@@ -68,21 +68,53 @@ document.querySelectorAll(".main-nav a").forEach(anchor => {
   });
 });
 
-// ===== TÉRKÉP INITIALIZÁLÁS =====
-
-// Ellenőrizzük, hogy létezik-e a térkép elem
+// ===== TÉRKÉP =====
 const mapElement = document.getElementById("hungary-map");
 
 if (mapElement) {
-  // Magyarország középpont
   const map = L.map("hungary-map").setView([47.1625, 19.5033], 7);
 
-  // Alaptérkép (OpenStreetMap)
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
 
-  // ===== LOGISZTIKAI PONTOK =====
+  const nameEl = document.getElementById("location-name");
+  const descEl = document.getElementById("location-description");
+
+  // ===== KOCKÁZATI SZÍNEZÉS =====
+  function getColor(risk) {
+    if (risk >= 75) return "#ef4444"; // piros
+    if (risk >= 65) return "#f59e0b"; // narancs
+    return "#22c55e"; // zöld
+  }
+
+  // ===== MEGYEI PONTOK (GeoJSON) =====
+  if (typeof countiesData !== "undefined") {
+    countiesData.features.forEach(feature => {
+      const coords = feature.geometry.coordinates;
+      const name = feature.properties.name;
+      const risk = feature.properties.risk;
+
+      const latlng = [coords[1], coords[0]];
+
+      const circle = L.circleMarker(latlng, {
+        radius: 12,
+        fillColor: getColor(risk),
+        color: "#ffffff",
+        weight: 1,
+        fillOpacity: 0.8
+      }).addTo(map);
+
+      circle.bindPopup(`<b>${name}</b><br>Kockázat: ${risk}`);
+
+      circle.on("click", () => {
+        nameEl.textContent = name;
+        descEl.textContent = `Ellátási lánc sérülékenységi index: ${risk}`;
+      });
+    });
+  }
+
+  // ===== FŐ LOGISZTIKAI PONTOK =====
   const locations = [
     {
       name: "Budapest",
@@ -111,10 +143,6 @@ if (mapElement) {
     }
   ];
 
-  const nameEl = document.getElementById("location-name");
-  const descEl = document.getElementById("location-description");
-
-  // Markerek létrehozása
   locations.forEach(loc => {
     const marker = L.marker(loc.coords).addTo(map);
 
