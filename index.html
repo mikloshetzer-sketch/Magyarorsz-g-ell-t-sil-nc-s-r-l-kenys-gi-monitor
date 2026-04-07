@@ -7,7 +7,6 @@
   <meta name="description" content="Interaktív dashboard Magyarország ellátási láncainak sérülékenységéről." />
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Leaflet -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -165,7 +164,7 @@
               <span class="map-info-label">Kiválasztott helyszín</span>
               <h3 id="location-name">Magyarország</h3>
               <p id="location-description">
-                Kattints egy jelölőre a térképen, és itt megjelenik az adott logisztikai vagy ipari csomópont rövid értékelése.
+                Kattints egy jelölőre vagy megyepontra a térképen, és itt megjelenik az adott hely rövid értékelése.
               </p>
             </div>
 
@@ -186,7 +185,7 @@
                 Következő körben a térkép kiegészíthető:
               </p>
               <ul class="map-list">
-                <li>megyei kockázati színezéssel,</li>
+                <li>valódi megyehatárokkal,</li>
                 <li>régiós sérülékenységi pontszámokkal,</li>
                 <li>vasúti, közúti és ipari rétegekkel.</li>
               </ul>
@@ -247,13 +246,13 @@
     </div>
   </footer>
 
-  <!-- Leaflet -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
 
+  <script src="hungary-counties.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
