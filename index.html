@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magyarország ellátásilánc-sérülékenységi monitor</title>
+  <meta name="description" content="Interaktív dashboard Magyarország ellátási láncainak sérülékenységéről." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="topbar">
+        <h1>Magyarország ellátásilánc-sérülékenységi monitor</h1>
+        <p class="subtitle">
+          Interaktív riport a hazai importfüggőség, logisztikai kitettség és ágazati sérülékenység bemutatására
+        </p>
+      </div>
+
+      <nav class="main-nav">
+        <a href="#attekintes">Áttekintés</a>
+        <a href="#mutatok">Fő mutatók</a>
+        <a href="#agazatok">Ágazatok</a>
+        <a href="#terkep">Térkép</a>
+        <a href="#stresszteszt">Stresszteszt</a>
+        <a href="#modszer">Módszertan</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="attekintes" class="hero">
+      <div class="container">
+        <div class="hero-box">
+          <div class="hero-text">
+            <h2>Dashboard célja</h2>
+            <p>
+              Ez a projekt Magyarország ellátási láncainak sérülékenységét mutatja be
+              interaktív módon. A riport fókuszál az importfüggőségre, az iparági
+              kitettségre, a logisztikai szűk keresztmetszetekre és a külső sokkok
+              hazai hatásaira.
+            </p>
+            <p>
+              A felület GitHub Pages környezetre készül, így könnyen publikálható,
+              megosztható és továbbfejleszthető.
+            </p>
+          </div>
+          <div class="hero-side">
+            <div class="info-card highlight">
+              <span class="label">Projekt fókusz</span>
+              <strong>Magyarországi ellátási kockázatok</strong>
+            </div>
+            <div class="info-card">
+              <span class="label">Tervezett adatforrások</span>
+              <strong>KSH, MNB, nyilvános logisztikai és téradatok</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="mutatok" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Fő mutatók</h2>
+          <p>Később ezek dinamikus adatból is frissíthetők lesznek.</p>
+        </div>
+
+        <div class="cards-grid">
+          <article class="metric-card">
+            <span class="metric-title">Összesített sérülékenységi index</span>
+            <div class="metric-value">72</div>
+            <p class="metric-note">Magas kitettség import- és energiaoldalon</p>
+          </article>
+
+          <article class="metric-card">
+            <span class="metric-title">Importkoncentrációs kockázat</span>
+            <div class="metric-value">68</div>
+            <p class="metric-note">Néhány partnerországra erős ráutaltság</p>
+          </article>
+
+          <article class="metric-card">
+            <span class="metric-title">Logisztikai sérülékenység</span>
+            <div class="metric-value">61</div>
+            <p class="metric-note">Folyosó- és csomópontfüggő működés</p>
+          </article>
+
+          <article class="metric-card">
+            <span class="metric-title">Ágazati kitettség</span>
+            <div class="metric-value">77</div>
+            <p class="metric-note">Autóipar és energia különösen érzékeny</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="agazatok" class="section alt-bg">
+      <div class="container">
+        <div class="section-header">
+          <h2>Ágazati kockázatok</h2>
+          <p>Első verzióban statikus blokkok, később szűrhető nézet.</p>
+        </div>
+
+        <div class="sector-grid">
+          <article class="sector-card">
+            <h3>Autóipar</h3>
+            <p>
+              Erős nemzetközi beszállítói integráció, magas export- és importkitettség,
+              érzékenység az alkatrészhiányra és külső keresleti sokkokra.
+            </p>
+          </article>
+
+          <article class="sector-card">
+            <h3>Energia</h3>
+            <p>
+              Magas stratégiai jelentőség, külső forrásoknak való kitettség,
+              ár- és ellátásbiztonsági kockázatokkal.
+            </p>
+          </article>
+
+          <article class="sector-card">
+            <h3>Élelmiszer-ellátás</h3>
+            <p>
+              Belföldi kapacitások mellett is jelentős input- és logisztikai függések
+              jelennek meg, különösen csomagolás, energia és szállítás terén.
+            </p>
+          </article>
+
+          <article class="sector-card">
+            <h3>Gyógyszeripar</h3>
+            <p>
+              Magas hozzáadott értékű ágazat, de alapanyag- és nemzetközi beszállítói
+              kapcsolatok miatt érzékeny lehet a globális zavarokra.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="terkep" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Logisztikai és területi nézet</h2>
+          <p>Itt később interaktív térképet fogunk elhelyezni.</p>
+        </div>
+
+        <div class="map-placeholder">
+          <div class="map-inner">
+            <h3>Térkép helye</h3>
+            <p>
+              Később ide kerülhet Magyarország megyékre bontott nézete,
+              logisztikai csomópontokkal, ipari tengelyekkel és fő szállítási folyosókkal.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stresszteszt" class="section alt-bg">
+      <div class="container">
+        <div class="section-header">
+          <h2>Stresszteszt</h2>
+          <p>Később interaktív szimulációvá alakítjuk.</p>
+        </div>
+
+        <div class="stress-layout">
+          <div class="stress-box">
+            <h3>Példa sokk</h3>
+            <p>Német ipari visszaesés</p>
+          </div>
+          <div class="stress-box">
+            <h3>Várható hatás</h3>
+            <p>Beszállítói rendeléscsökkenés és exportkockázat</p>
+          </div>
+          <div class="stress-box">
+            <h3>Érintett területek</h3>
+            <p>Autóipar, logisztika, nyugat-magyarországi ipari térségek</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="modszer" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Módszertan</h2>
+        </div>
+
+        <div class="method-box">
+          <p>
+            A dashboard egy összetett sérülékenységi megközelítést alkalmaz, amely
+            egyesíti az importfüggőséget, a beszállítói koncentrációt, a logisztikai
+            kitettséget, az energiaérzékenységet és az ágazati sebezhetőséget.
+          </p>
+          <p>
+            Az első verzió demonstrációs célú, később valós adatokkal és interaktív
+            szűréssel bővíthető.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Projektverzió: 1.0 | Készítve GitHub Pages publikálásra</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
