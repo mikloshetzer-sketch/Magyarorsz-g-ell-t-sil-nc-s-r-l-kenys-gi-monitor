@@ -23,9 +23,11 @@ const stressBoxes = document.querySelectorAll(".stress-box");
 function updateStressTest(scenarioKey) {
   const scenario = scenarios[scenarioKey];
 
-  stressBoxes[0].querySelector("p").textContent = scenario.nev;
-  stressBoxes[1].querySelector("p").textContent = scenario.hatas;
-  stressBoxes[2].querySelector("p").textContent = scenario.erintett;
+  if (stressBoxes.length >= 3) {
+    stressBoxes[0].querySelector("p").textContent = scenario.nev;
+    stressBoxes[1].querySelector("p").textContent = scenario.hatas;
+    stressBoxes[2].querySelector("p").textContent = scenario.erintett;
+  }
 }
 
 stressBoxes.forEach((box, index) => {
@@ -42,7 +44,7 @@ stressBoxes.forEach((box, index) => {
 const metrics = document.querySelectorAll(".metric-value");
 
 metrics.forEach(metric => {
-  const value = parseInt(metric.textContent);
+  const value = parseInt(metric.textContent, 10);
 
   if (value >= 75) {
     metric.style.color = "#ef4444";
@@ -55,16 +57,18 @@ metrics.forEach(metric => {
 
 // ===== SMOOTH SCROLL =====
 document.querySelectorAll(".main-nav a").forEach(anchor => {
-  anchor.addEventListener("click", function(e) {
+  anchor.addEventListener("click", function (e) {
     e.preventDefault();
 
     const targetId = this.getAttribute("href").substring(1);
     const target = document.getElementById(targetId);
 
-    window.scrollTo({
-      top: target.offsetTop - 60,
-      behavior: "smooth"
-    });
+    if (target) {
+      window.scrollTo({
+        top: target.offsetTop - 60,
+        behavior: "smooth"
+      });
+    }
   });
 });
 
@@ -81,76 +85,164 @@ if (mapElement) {
   const nameEl = document.getElementById("location-name");
   const descEl = document.getElementById("location-description");
 
-  // ===== KOCKÁZATI SZÍNEZÉS =====
-  function getColor(risk) {
-    if (risk >= 75) return "#ef4444"; // piros
-    if (risk >= 65) return "#f59e0b"; // narancs
-    return "#22c55e"; // zöld
+  function updateInfoPanel(title, text) {
+    if (nameEl) nameEl.textContent = title;
+    if (descEl) descEl.textContent = text;
   }
 
-  // ===== MEGYEI PONTOK (GeoJSON) =====
-  if (typeof countiesData !== "undefined") {
-    countiesData.features.forEach(feature => {
-      const coords = feature.geometry.coordinates;
-      const name = feature.properties.name;
-      const risk = feature.properties.risk;
+  function getRiskByCountyName(countyName) {
+    const riskMap = {
+      "Budapest": 78,
+      "Pest": 74,
+      "Győr-Moson-Sopron": 76,
+      "Komárom-Esztergom": 73,
+      "Fejér": 70,
+      "Bács-Kiskun": 64,
+      "Csongrád-Csanád": 62,
+      "Hajdú-Bihar": 67,
+      "Szabolcs-Szatmár-Bereg": 66,
+      "Borsod-Abaúj-Zemplén": 68,
+      "Heves": 60,
+      "Jász-Nagykun-Szolnok": 61,
+      "Veszprém": 58,
+      "Vas": 59,
+      "Zala": 57,
+      "Somogy": 55,
+      "Tolna": 54,
+      "Baranya": 56,
+      "Nógrád": 52,
+      "Békés": 53
+    };
 
-      const latlng = [coords[1], coords[0]];
+    return riskMap[countyName] ?? 58;
+  }
 
-      const circle = L.circleMarker(latlng, {
-        radius: 12,
-        fillColor: getColor(risk),
+  function getColor(risk) {
+    if (risk >= 75) return "#b91c1c";
+    if (risk >= 68) return "#ea580c";
+    if (risk >= 60) return "#f59e0b";
+    return "#16a34a";
+  }
+
+  function countyStyle(feature) {
+    const countyName =
+      feature?.properties?.name ||
+      feature?.properties?.NAME_1 ||
+      feature?.properties?.county ||
+      "Ismeretlen";
+
+    const risk = getRiskByCountyName(countyName);
+
+    return {
+      fillColor: getColor(risk),
+      weight: 1.5,
+      opacity: 1,
+      color: "#e2e8f0",
+      fillOpacity: 0.7
+    };
+  }
+
+  function onEachCounty(feature, layer) {
+    const countyName =
+      feature?.properties?.name ||
+      feature?.properties?.NAME_1 ||
+      feature?.properties?.county ||
+      "Ismeretlen megye";
+
+    const risk = getRiskByCountyName(countyName);
+
+    layer.bindPopup(
+      `<strong>${countyName}</strong><br>Ellátási lánc sérülékenységi index: ${risk}`
+    );
+
+    layer.on("mouseover", function () {
+      this.setStyle({
+        weight: 3,
         color: "#ffffff",
-        weight: 1,
-        fillOpacity: 0.8
+        fillOpacity: 0.85
+      });
+      this.bringToFront();
+    });
+
+    layer.on("mouseout", function () {
+      countyLayer.resetStyle(this);
+    });
+
+    layer.on("click", function () {
+      updateInfoPanel(
+        countyName,
+        `Ellátási lánc sérülékenységi index: ${risk}. A színezés demonstrációs célú megyei kockázati besorolást mutat.`
+      );
+    });
+  }
+
+  let countyLayer;
+
+  // ===== VALÓDI MEGYEHATÁROK BETÖLTÉSE =====
+  const geoJsonUrl =
+    "https://raw.githubusercontent.com/wuerdo/geoHungary/master/counties.geojson";
+
+  fetch(geoJsonUrl)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Nem sikerült betölteni a megyehatár-fájlt.");
+      }
+      return response.json();
+    })
+    .then(data => {
+      countyLayer = L.geoJSON(data, {
+        style: countyStyle,
+        onEachFeature: onEachCounty
       }).addTo(map);
 
-      circle.bindPopup(`<b>${name}</b><br>Kockázat: ${risk}`);
-
-      circle.on("click", () => {
-        nameEl.textContent = name;
-        descEl.textContent = `Ellátási lánc sérülékenységi index: ${risk}`;
+      map.fitBounds(countyLayer.getBounds(), {
+        padding: [20, 20]
       });
+
+      // ===== FŐ LOGISZTIKAI PONTOK =====
+      const locations = [
+        {
+          name: "Budapest",
+          coords: [47.4979, 19.0402],
+          desc: "Országos logisztikai és elosztási központ"
+        },
+        {
+          name: "Győr",
+          coords: [47.6875, 17.6504],
+          desc: "Autóipari központ és nyugati kapcsolat"
+        },
+        {
+          name: "Debrecen",
+          coords: [47.5316, 21.6273],
+          desc: "Új ipari és beszállítói bázis"
+        },
+        {
+          name: "Kecskemét",
+          coords: [46.8964, 19.6897],
+          desc: "Járműipari integráció"
+        },
+        {
+          name: "Záhony",
+          coords: [48.4047, 22.1767],
+          desc: "Keleti logisztikai kapu"
+        }
+      ];
+
+      locations.forEach(loc => {
+        const marker = L.marker(loc.coords).addTo(map);
+
+        marker.bindPopup(`<strong>${loc.name}</strong><br>${loc.desc}`);
+
+        marker.on("click", () => {
+          updateInfoPanel(loc.name, loc.desc);
+        });
+      });
+    })
+    .catch(error => {
+      console.error(error);
+      updateInfoPanel(
+        "Térképhiba",
+        "A valódi megyehatárok nem töltődtek be. Ellenőrizd az internetkapcsolatot, majd frissítsd az oldalt."
+      );
     });
-  }
-
-  // ===== FŐ LOGISZTIKAI PONTOK =====
-  const locations = [
-    {
-      name: "Budapest",
-      coords: [47.4979, 19.0402],
-      desc: "Országos logisztikai és elosztási központ"
-    },
-    {
-      name: "Győr",
-      coords: [47.6875, 17.6504],
-      desc: "Autóipari központ és nyugati kapcsolat"
-    },
-    {
-      name: "Debrecen",
-      coords: [47.5316, 21.6273],
-      desc: "Új ipari és beszállítói bázis"
-    },
-    {
-      name: "Kecskemét",
-      coords: [46.8964, 19.6897],
-      desc: "Járműipari integráció"
-    },
-    {
-      name: "Záhony",
-      coords: [48.4047, 22.1767],
-      desc: "Keleti logisztikai kapu"
-    }
-  ];
-
-  locations.forEach(loc => {
-    const marker = L.marker(loc.coords).addTo(map);
-
-    marker.bindPopup(`<b>${loc.name}</b><br>${loc.desc}`);
-
-    marker.on("click", () => {
-      nameEl.textContent = loc.name;
-      descEl.textContent = loc.desc;
-    });
-  });
 }
