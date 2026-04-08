@@ -22,7 +22,7 @@ const countyData = {
   "heves": { importDependency: 60, industryExposure: 61, logisticsRisk: 60 },
   "jasz nagykun szolnok": { importDependency: 61, industryExposure: 62, logisticsRisk: 61 },
   "veszprem": { importDependency: 58, industryExposure: 60, logisticsRisk: 59 },
-  "vas": { importDependency: 59, industryExposure: 61, logisticsRisk: 60 },
+  "Vas": { importDependency: 59, industryExposure: 61, logisticsRisk: 60 },
   "zala": { importDependency: 57, industryExposure: 58, logisticsRisk: 58 },
 
   "somogy": { importDependency: 55, industryExposure: 56, logisticsRisk: 56 },
