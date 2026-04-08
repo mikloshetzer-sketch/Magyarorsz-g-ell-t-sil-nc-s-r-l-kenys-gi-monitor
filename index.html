@@ -171,6 +171,10 @@
 
           <aside class="map-info-panel">
             <div class="map-info-card">
+  <span class="map-info-label">Megyei kockázati profil</span>
+  <canvas id="county-chart"></canvas>
+</div>
+            <div class="map-info-card">
               <span class="map-info-label">Kiválasztott helyszín</span>
               <h3 id="location-name">Magyarország</h3>
               <p id="location-description">
@@ -286,6 +290,7 @@
     crossorigin=""
   ></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="hungary-counties.js"></script>
   <script src="data.js"></script>
   <script src="script.js"></script>
