@@ -256,6 +256,40 @@ body {
   color: #e2e8f0;
 }
 
+/* LEGENDA */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex: 0 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.legend-color.high {
+  background: #b91c1c;
+}
+
+.legend-color.medium-high {
+  background: #ea580c;
+}
+
+.legend-color.medium {
+  background: #f59e0b;
+}
+
+.legend-color.low {
+  background: #16a34a;
+}
+
 /* LEAFLET FINOMHANGOLÁS */
 .leaflet-container {
   font-family: inherit;
