@@ -228,6 +228,40 @@ function getRiskColor(risk) {
   return "#16a34a";
 }
 
+// ===== LEGENDA SEGÉD =====
+function getLegendLevelClass(risk) {
+  if (risk >= 75) return "high";
+  if (risk >= 68) return "medium-high";
+  if (risk >= 60) return "medium";
+  return "low";
+}
+
+function resetLegendHighlight() {
+  const legendItems = document.querySelectorAll(".legend-item");
+
+  legendItems.forEach((item) => {
+    item.style.opacity = "1";
+    item.style.transform = "none";
+  });
+}
+
+function highlightLegendByRisk(risk) {
+  const legendItems = document.querySelectorAll(".legend-item");
+  const levelClass = getLegendLevelClass(risk);
+
+  legendItems.forEach((item) => {
+    item.style.opacity = "0.35";
+    item.style.transform = "none";
+  });
+
+  const target = document.querySelector(`.legend-color.${levelClass}`)?.closest(".legend-item");
+
+  if (target) {
+    target.style.opacity = "1";
+    target.style.transform = "scale(1.02)";
+  }
+}
+
 // ===== STRESSZTESZT ADATOK =====
 const scenarios = {
   nemet_visszaeses: {
@@ -394,6 +428,7 @@ function initializeMap() {
   ];
 
   let countyLayer = null;
+  let selectedRisk = null;
 
   function countyStyle(feature) {
     const rawName = extractCountyName(feature);
@@ -410,12 +445,17 @@ function initializeMap() {
 
   function highlightCounty(event) {
     const layer = event.target;
+    const feature = layer.feature;
+    const rawName = extractCountyName(feature);
+    const countyData = getCountyRiskData(rawName);
 
     layer.setStyle({
       weight: 3,
       color: "#ffffff",
       fillOpacity: 0.88
     });
+
+    highlightLegendByRisk(countyData.risk);
 
     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
       layer.bringToFront();
@@ -425,6 +465,12 @@ function initializeMap() {
   function resetCountyHighlight(event) {
     if (countyLayer) {
       countyLayer.resetStyle(event.target);
+    }
+
+    if (selectedRisk !== null) {
+      highlightLegendByRisk(selectedRisk);
+    } else {
+      resetLegendHighlight();
     }
   }
 
@@ -445,6 +491,10 @@ function initializeMap() {
       mouseover: highlightCounty,
       mouseout: resetCountyHighlight,
       click: function () {
+        selectedRisk = countyData.risk;
+
+        highlightLegendByRisk(countyData.risk);
+
         updateInfoPanel(
           displayName,
           `Ellátási lánc sérülékenységi index: ${countyData.risk}. ${countyData.description}`
@@ -481,6 +531,8 @@ function initializeMap() {
         );
 
         marker.on("click", function () {
+          selectedRisk = null;
+          resetLegendHighlight();
           updateInfoPanel(location.name, location.description);
         });
       });
@@ -501,6 +553,8 @@ function initializeMap() {
         );
 
         marker.on("click", function () {
+          selectedRisk = null;
+          resetLegendHighlight();
           updateInfoPanel(location.name, location.description);
         });
       });
