@@ -1,8 +1,11 @@
 // ======================================================
 // MAGYARORSZÁG ELLÁTÁSILÁNC-SÉRÜLÉKENYSÉGI MONITOR
 // script.js
-// Debugolt, teljes verzió
+// Debugolt, teljes verzió + térképi szűrő
 // ======================================================
+
+// ===== AKTUÁLIS TÉRKÉPI MÓD =====
+let currentRiskMode = "overall";
 
 // ===== SEGÉDFÜGGVÉNYEK =====
 function normalizeName(name) {
@@ -215,6 +218,21 @@ const countyRiskMap = {
   }
 };
 
+// ===== MÓD CÍMKE =====
+function getCurrentModeLabel() {
+  if (currentRiskMode === "import") {
+    return "Importfüggőség";
+  }
+  if (currentRiskMode === "industry") {
+    return "Ipari kitettség";
+  }
+  if (currentRiskMode === "logistics") {
+    return "Logisztikai kockázat";
+  }
+  return "Ellátási lánc sérülékenységi index";
+}
+
+// ===== VALÓS / FALLBACK ADAT LEKÉRÉS =====
 function getCountyRiskData(rawName) {
   const key = canonicalCountyName(rawName);
 
@@ -225,28 +243,37 @@ function getCountyRiskData(rawName) {
     const realData = getCountyRealData(key);
 
     if (realData) {
-      const calculatedRisk = getCalculatedRisk(key);
+      let displayValue = getCalculatedRisk(key);
+
+      if (currentRiskMode === "import") {
+        displayValue = realData.importDependency;
+      } else if (currentRiskMode === "industry") {
+        displayValue = realData.industryExposure;
+      } else if (currentRiskMode === "logistics") {
+        displayValue = realData.logisticsRisk;
+      }
 
       let label = "alacsony";
-      if (calculatedRisk >= 75) {
+      if (displayValue >= 75) {
         label = "magas";
-      } else if (calculatedRisk >= 68) {
+      } else if (displayValue >= 68) {
         label = "közepesen magas";
-      } else if (calculatedRisk >= 60) {
+      } else if (displayValue >= 60) {
         label = "közepes";
       }
 
       return {
-        risk: calculatedRisk,
+        risk: displayValue,
         label: label,
         description:
           `Importfüggőség: ${realData.importDependency}, ` +
           `Ipari kitettség: ${realData.industryExposure}, ` +
           `Logisztikai kockázat: ${realData.logisticsRisk}. ` +
-          `A sérülékenységi index számított érték a data.js alapján.`,
+          `A megjelenített érték a "${getCurrentModeLabel()}" mód szerint került kiválasztásra.`,
         source: "data.js",
         keyUsed: key,
-        rawName: rawName
+        rawName: rawName,
+        realData: realData
       };
     }
   }
@@ -330,12 +357,18 @@ const scenarios = {
   }
 };
 
+// ===== GLOBÁLIS TÉRKÉP REFERENCIÁK =====
+let globalMap = null;
+let globalCountyLayer = null;
+let globalSelectedRisk = null;
+
 // ===== DOM BETÖLTÉS UTÁN =====
 document.addEventListener("DOMContentLoaded", function () {
   initializeMetricColors();
   initializeSmoothScroll();
   initializeStressTest();
   initializeMap();
+  initializeRiskModeFilter();
 });
 
 // ===== METRIKÁK SZÍNEZÉSE =====
@@ -424,6 +457,138 @@ function initializeStressTest() {
   });
 }
 
+// ===== SZŰRŐ =====
+function initializeRiskModeFilter() {
+  const filter = document.getElementById("risk-mode-select");
+
+  if (!filter) {
+    return;
+  }
+
+  filter.value = currentRiskMode;
+
+  filter.addEventListener("change", function () {
+    currentRiskMode = this.value;
+    globalSelectedRisk = null;
+    resetLegendHighlight();
+
+    if (globalCountyLayer) {
+      globalCountyLayer.setStyle(function (feature) {
+        return countyStyle(feature);
+      });
+    }
+
+    safeSetText(
+      document.getElementById("location-name"),
+      "Magyarország"
+    );
+
+    safeSetText(
+      document.getElementById("location-description"),
+      `Az aktuális térképi mutató: ${getCurrentModeLabel()}. Kattints egy megyére a részletes értékekhez.`
+    );
+  });
+}
+
+// ===== TÉRKÉP STÍLUS =====
+function countyStyle(feature) {
+  const rawName = extractCountyName(feature);
+  const countyData = getCountyRiskData(rawName);
+
+  return {
+    fillColor: getRiskColor(countyData.risk),
+    weight: 1.5,
+    opacity: 1,
+    color: "#e2e8f0",
+    fillOpacity: 0.72
+  };
+}
+
+function highlightCounty(event) {
+  const layer = event.target;
+  const feature = layer.feature;
+  const rawName = extractCountyName(feature);
+  const countyData = getCountyRiskData(rawName);
+
+  layer.setStyle({
+    weight: 3,
+    color: "#ffffff",
+    fillOpacity: 0.88
+  });
+
+  highlightLegendByRisk(countyData.risk);
+
+  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+    layer.bringToFront();
+  }
+}
+
+function resetCountyHighlight(event) {
+  if (globalCountyLayer) {
+    globalCountyLayer.resetStyle(event.target);
+  }
+
+  if (globalSelectedRisk !== null) {
+    highlightLegendByRisk(globalSelectedRisk);
+  } else {
+    resetLegendHighlight();
+  }
+}
+
+function buildCountyDescription(countyData) {
+  const modeLabel = getCurrentModeLabel();
+
+  if (countyData.realData) {
+    return (
+      `${modeLabel}: ${countyData.risk}. ` +
+      `Importfüggőség: ${countyData.realData.importDependency}, ` +
+      `Ipari kitettség: ${countyData.realData.industryExposure}, ` +
+      `Logisztikai kockázat: ${countyData.realData.logisticsRisk}.`
+    );
+  }
+
+  return `${modeLabel}: ${countyData.risk}. ${countyData.description}`;
+}
+
+function onEachCounty(feature, layer) {
+  const rawName = extractCountyName(feature);
+  const displayName = rawName || "Ismeretlen megye";
+  const countyData = getCountyRiskData(rawName);
+
+  const popupHtml = `
+    <strong>${displayName}</strong><br>
+    ${getCurrentModeLabel()}: ${countyData.risk}<br>
+    Kockázati szint: ${countyData.label}<br>
+    Forrás: ${countyData.source}<br>
+    Kulcs: ${countyData.keyUsed}
+  `;
+
+  layer.bindPopup(popupHtml);
+
+  layer.on({
+    mouseover: highlightCounty,
+    mouseout: resetCountyHighlight,
+    click: function () {
+      const freshCountyData = getCountyRiskData(rawName);
+
+      globalSelectedRisk = freshCountyData.risk;
+
+      highlightLegendByRisk(freshCountyData.risk);
+
+      safeSetText(
+        document.getElementById("location-name"),
+        displayName
+      );
+
+      safeSetText(
+        document.getElementById("location-description"),
+        `${buildCountyDescription(freshCountyData)} ` +
+          `[Nyers név: ${freshCountyData.rawName || "nincs"} | Kulcs: ${freshCountyData.keyUsed} | Forrás: ${freshCountyData.source}]`
+      );
+    }
+  });
+}
+
 // ===== TÉRKÉP =====
 function initializeMap() {
   const mapElement = document.getElementById("hungary-map");
@@ -440,13 +605,13 @@ function initializeMap() {
     safeSetText(infoDescriptionElement, text);
   }
 
-  const map = L.map("hungary-map", {
+  globalMap = L.map("hungary-map", {
     zoomControl: true
   }).setView([47.1625, 19.5033], 7);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors"
-  }).addTo(map);
+  }).addTo(globalMap);
 
   const logisticsLocations = [
     {
@@ -481,85 +646,6 @@ function initializeMap() {
     }
   ];
 
-  let countyLayer = null;
-  let selectedRisk = null;
-
-  function countyStyle(feature) {
-    const rawName = extractCountyName(feature);
-    const countyData = getCountyRiskData(rawName);
-
-    return {
-      fillColor: getRiskColor(countyData.risk),
-      weight: 1.5,
-      opacity: 1,
-      color: "#e2e8f0",
-      fillOpacity: 0.72
-    };
-  }
-
-  function highlightCounty(event) {
-    const layer = event.target;
-    const feature = layer.feature;
-    const rawName = extractCountyName(feature);
-    const countyData = getCountyRiskData(rawName);
-
-    layer.setStyle({
-      weight: 3,
-      color: "#ffffff",
-      fillOpacity: 0.88
-    });
-
-    highlightLegendByRisk(countyData.risk);
-
-    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-      layer.bringToFront();
-    }
-  }
-
-  function resetCountyHighlight(event) {
-    if (countyLayer) {
-      countyLayer.resetStyle(event.target);
-    }
-
-    if (selectedRisk !== null) {
-      highlightLegendByRisk(selectedRisk);
-    } else {
-      resetLegendHighlight();
-    }
-  }
-
-  function onEachCounty(feature, layer) {
-    const rawName = extractCountyName(feature);
-    const displayName = rawName || "Ismeretlen megye";
-    const countyData = getCountyRiskData(rawName);
-
-    const popupHtml = `
-      <strong>${displayName}</strong><br>
-      Ellátási lánc sérülékenységi index: ${countyData.risk}<br>
-      Kockázati szint: ${countyData.label}<br>
-      Forrás: ${countyData.source}<br>
-      Kulcs: ${countyData.keyUsed}
-    `;
-
-    layer.bindPopup(popupHtml);
-
-    layer.on({
-      mouseover: highlightCounty,
-      mouseout: resetCountyHighlight,
-      click: function () {
-        selectedRisk = countyData.risk;
-
-        highlightLegendByRisk(countyData.risk);
-
-        updateInfoPanel(
-          displayName,
-          `Ellátási lánc sérülékenységi index: ${countyData.risk}. ${countyData.description} ` +
-          `[Nyers név: ${countyData.rawName || "nincs"} | Kulcs: ${countyData.keyUsed} | Forrás: ${countyData.source}]`
-        );
-      }
-    });
-  }
-
   const geoJsonUrl =
     "https://raw.githubusercontent.com/wuerdo/geoHungary/master/counties.geojson";
 
@@ -571,24 +657,24 @@ function initializeMap() {
       return response.json();
     })
     .then((data) => {
-      countyLayer = L.geoJSON(data, {
+      globalCountyLayer = L.geoJSON(data, {
         style: countyStyle,
         onEachFeature: onEachCounty
-      }).addTo(map);
+      }).addTo(globalMap);
 
-      map.fitBounds(countyLayer.getBounds(), {
+      globalMap.fitBounds(globalCountyLayer.getBounds(), {
         padding: [20, 20]
       });
 
       logisticsLocations.forEach((location) => {
-        const marker = L.marker(location.coords).addTo(map);
+        const marker = L.marker(location.coords).addTo(globalMap);
 
         marker.bindPopup(
           `<strong>${location.name}</strong><br>${location.description}`
         );
 
         marker.on("click", function () {
-          selectedRisk = null;
+          globalSelectedRisk = null;
           resetLegendHighlight();
           updateInfoPanel(location.name, location.description);
         });
@@ -603,14 +689,14 @@ function initializeMap() {
       );
 
       logisticsLocations.forEach((location) => {
-        const marker = L.marker(location.coords).addTo(map);
+        const marker = L.marker(location.coords).addTo(globalMap);
 
         marker.bindPopup(
           `<strong>${location.name}</strong><br>${location.description}`
         );
 
         marker.on("click", function () {
-          selectedRisk = null;
+          globalSelectedRisk = null;
           resetLegendHighlight();
           updateInfoPanel(location.name, location.description);
         });
