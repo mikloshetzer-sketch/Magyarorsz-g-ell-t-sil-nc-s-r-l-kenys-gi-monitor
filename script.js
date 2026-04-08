@@ -211,6 +211,38 @@ const countyRiskMap = {
 function getCountyRiskData(rawName) {
   const key = canonicalCountyName(rawName);
 
+  // ===== 1. ELSŐBBSÉG: data.js-ből érkező adat =====
+  if (
+    typeof getCountyRealData === "function" &&
+    typeof getCalculatedRisk === "function"
+  ) {
+    const realData = getCountyRealData(key);
+
+    if (realData) {
+      const calculatedRisk = getCalculatedRisk(key);
+
+      let label = "alacsony";
+      if (calculatedRisk >= 75) {
+        label = "magas";
+      } else if (calculatedRisk >= 68) {
+        label = "közepesen magas";
+      } else if (calculatedRisk >= 60) {
+        label = "közepes";
+      }
+
+      return {
+        risk: calculatedRisk,
+        label: label,
+        description:
+          `Importfüggőség: ${realData.importDependency}, ` +
+          `Ipari kitettség: ${realData.industryExposure}, ` +
+          `Logisztikai kockázat: ${realData.logisticsRisk}. ` +
+          `A sérülékenységi index számított érték a data.js alapján.`
+      };
+    }
+  }
+
+  // ===== 2. FALLBACK: korábbi kézi értékek =====
   return (
     countyRiskMap[key] || {
       risk: 58,
@@ -254,7 +286,9 @@ function highlightLegendByRisk(risk) {
     item.style.transform = "none";
   });
 
-  const target = document.querySelector(`.legend-color.${levelClass}`)?.closest(".legend-item");
+  const target = document
+    .querySelector(`.legend-color.${levelClass}`)
+    ?.closest(".legend-item");
 
   if (target) {
     target.style.opacity = "1";
@@ -272,11 +306,13 @@ const scenarios = {
   energia_sokk: {
     title: "Energiaár-sokk",
     impact: "Termelési költségek emelkedése és inflációs nyomás",
-    affected: "Energiaintenzív iparágak, feldolgozóipar, háztartási ellátási költségek"
+    affected:
+      "Energiaintenzív iparágak, feldolgozóipar, háztartási ellátási költségek"
   },
   szallitasi_zavar: {
     title: "Szállítási útvonal zavar",
-    impact: "Késések, készlethiányok és alternatív útvonalak miatti költségnövekedés",
+    impact:
+      "Késések, készlethiányok és alternatív útvonalak miatti költségnövekedés",
     affected: "Logisztika, FMCG, élelmiszeripar, importfüggő termelés"
   }
 };
@@ -403,27 +439,32 @@ function initializeMap() {
     {
       name: "Budapest",
       coords: [47.4979, 19.0402],
-      description: "Országos logisztikai és elosztási központ, kiemelt raktározási és közlekedési szereppel."
+      description:
+        "Országos logisztikai és elosztási központ, kiemelt raktározási és közlekedési szereppel."
     },
     {
       name: "Győr",
       coords: [47.6875, 17.6504],
-      description: "Autóipari központ és nyugati kapcsolat, erős exportorientált beszállítói háttérrel."
+      description:
+        "Autóipari központ és nyugati kapcsolat, erős exportorientált beszállítói háttérrel."
     },
     {
       name: "Debrecen",
       coords: [47.5316, 21.6273],
-      description: "Növekvő ipari és beszállítói bázis, stratégiai kelet-magyarországi szerepkörrel."
+      description:
+        "Növekvő ipari és beszállítói bázis, stratégiai kelet-magyarországi szerepkörrel."
     },
     {
       name: "Kecskemét",
       coords: [46.8964, 19.6897],
-      description: "Járműipari integráció és beszállítói kitettség szempontjából fontos térségi központ."
+      description:
+        "Járműipari integráció és beszállítói kitettség szempontjából fontos térségi központ."
     },
     {
       name: "Záhony",
       coords: [48.4047, 22.1767],
-      description: "Keleti logisztikai kapu, tranzit- és határmenti áruforgalmi szereppel."
+      description:
+        "Keleti logisztikai kapu, tranzit- és határmenti áruforgalmi szereppel."
     }
   ];
 
