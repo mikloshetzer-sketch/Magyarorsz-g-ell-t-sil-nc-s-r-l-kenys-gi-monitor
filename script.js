@@ -1,11 +1,17 @@
 // ======================================================
 // MAGYARORSZÁG ELLÁTÁSILÁNC-SÉRÜLÉKENYSÉGI MONITOR
 // script.js
-// Debugolt, teljes verzió + térképi szűrő
+// Debugolt, teljes verzió + térképi szűrő + megyei diagram
 // ======================================================
 
 // ===== AKTUÁLIS TÉRKÉPI MÓD =====
 let currentRiskMode = "overall";
+
+// ===== GLOBÁLIS TÉRKÉP/DIAGRAM REFERENCIÁK =====
+let globalMap = null;
+let globalCountyLayer = null;
+let globalSelectedRisk = null;
+let countyChart = null;
 
 // ===== SEGÉDFÜGGVÉNYEK =====
 function normalizeName(name) {
@@ -357,16 +363,105 @@ const scenarios = {
   }
 };
 
-// ===== GLOBÁLIS TÉRKÉP REFERENCIÁK =====
-let globalMap = null;
-let globalCountyLayer = null;
-let globalSelectedRisk = null;
+// ===== DIAGRAM =====
+function initializeCountyChart() {
+  const chartCanvas = document.getElementById("county-chart");
+
+  if (!chartCanvas || typeof Chart === "undefined") {
+    return;
+  }
+
+  const ctx = chartCanvas.getContext("2d");
+
+  countyChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Importfüggőség", "Ipari kitettség", "Logisztikai kockázat"],
+      datasets: [
+        {
+          label: "Érték",
+          data: [0, 0, 0],
+          backgroundColor: [
+            "rgba(239, 68, 68, 0.7)",
+            "rgba(245, 158, 11, 0.7)",
+            "rgba(59, 130, 246, 0.7)"
+          ],
+          borderColor: [
+            "rgba(239, 68, 68, 1)",
+            "rgba(245, 158, 11, 1)",
+            "rgba(59, 130, 246, 1)"
+          ],
+          borderWidth: 1.5,
+          borderRadius: 8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          enabled: true
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            color: "#cbd5e1"
+          },
+          grid: {
+            color: "rgba(148, 163, 184, 0.15)"
+          }
+        },
+        x: {
+          ticks: {
+            color: "#cbd5e1"
+          },
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+}
+
+function updateCountyChart(rawName) {
+  if (!countyChart) {
+    return;
+  }
+
+  const key = canonicalCountyName(rawName);
+
+  if (typeof getCountyRealData === "function") {
+    const realData = getCountyRealData(key);
+
+    if (realData) {
+      countyChart.data.datasets[0].data = [
+        realData.importDependency,
+        realData.industryExposure,
+        realData.logisticsRisk
+      ];
+      countyChart.update();
+      return;
+    }
+  }
+
+  countyChart.data.datasets[0].data = [0, 0, 0];
+  countyChart.update();
+}
 
 // ===== DOM BETÖLTÉS UTÁN =====
 document.addEventListener("DOMContentLoaded", function () {
   initializeMetricColors();
   initializeSmoothScroll();
   initializeStressTest();
+  initializeCountyChart();
   initializeMap();
   initializeRiskModeFilter();
 });
@@ -487,6 +582,8 @@ function initializeRiskModeFilter() {
       document.getElementById("location-description"),
       `Az aktuális térképi mutató: ${getCurrentModeLabel()}. Kattints egy megyére a részletes értékekhez.`
     );
+
+    updateCountyChart("");
   });
 }
 
@@ -574,6 +671,7 @@ function onEachCounty(feature, layer) {
       globalSelectedRisk = freshCountyData.risk;
 
       highlightLegendByRisk(freshCountyData.risk);
+      updateCountyChart(rawName);
 
       safeSetText(
         document.getElementById("location-name"),
@@ -677,6 +775,7 @@ function initializeMap() {
           globalSelectedRisk = null;
           resetLegendHighlight();
           updateInfoPanel(location.name, location.description);
+          updateCountyChart("");
         });
       });
     })
@@ -699,6 +798,7 @@ function initializeMap() {
           globalSelectedRisk = null;
           resetLegendHighlight();
           updateInfoPanel(location.name, location.description);
+          updateCountyChart("");
         });
       });
     });
