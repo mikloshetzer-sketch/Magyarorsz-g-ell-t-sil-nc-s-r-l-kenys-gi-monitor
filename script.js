@@ -1,7 +1,7 @@
 // ======================================================
 // MAGYARORSZÁG ELLÁTÁSILÁNC-SÉRÜLÉKENYSÉGI MONITOR
 // script.js
-// Teljes, egyben használható verzió
+// Debugolt, teljes verzió
 // ======================================================
 
 // ===== SEGÉDFÜGGVÉNYEK =====
@@ -57,6 +57,13 @@ function extractCountyName(feature) {
 function canonicalCountyName(rawName) {
   const n = normalizeName(rawName);
 
+  const cleaned = n
+    .replace(/\bmegye\b/g, "")
+    .replace(/\bvarmegye\b/g, "")
+    .replace(/\bcounty\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
   const aliases = {
     "budapest": "budapest",
     "pest": "pest",
@@ -81,7 +88,7 @@ function canonicalCountyName(rawName) {
     "bekes": "bekes"
   };
 
-  return aliases[n] || n;
+  return aliases[cleaned] || cleaned;
 }
 
 // ===== KOCKÁZATI ADATOK =====
@@ -211,7 +218,6 @@ const countyRiskMap = {
 function getCountyRiskData(rawName) {
   const key = canonicalCountyName(rawName);
 
-  // ===== 1. ELSŐBBSÉG: data.js-ből érkező adat =====
   if (
     typeof getCountyRealData === "function" &&
     typeof getCalculatedRisk === "function"
@@ -237,20 +243,27 @@ function getCountyRiskData(rawName) {
           `Importfüggőség: ${realData.importDependency}, ` +
           `Ipari kitettség: ${realData.industryExposure}, ` +
           `Logisztikai kockázat: ${realData.logisticsRisk}. ` +
-          `A sérülékenységi index számított érték a data.js alapján.`
+          `A sérülékenységi index számított érték a data.js alapján.`,
+        source: "data.js",
+        keyUsed: key,
+        rawName: rawName
       };
     }
   }
 
-  // ===== 2. FALLBACK: korábbi kézi értékek =====
-  return (
-    countyRiskMap[key] || {
-      risk: 58,
-      label: "mérsékelt",
-      description:
-        "Ehhez a megyéhez még nincs külön részletes leírás, ezért alapértelmezett demonstrációs érték jelenik meg."
-    }
-  );
+  const fallback = countyRiskMap[key] || {
+    risk: 58,
+    label: "mérsékelt",
+    description:
+      "Ehhez a megyéhez még nincs külön részletes leírás, ezért alapértelmezett demonstrációs érték jelenik meg."
+  };
+
+  return {
+    ...fallback,
+    source: countyRiskMap[key] ? "countyRiskMap" : "default-fallback",
+    keyUsed: key,
+    rawName: rawName
+  };
 }
 
 function getRiskColor(risk) {
@@ -523,7 +536,9 @@ function initializeMap() {
     const popupHtml = `
       <strong>${displayName}</strong><br>
       Ellátási lánc sérülékenységi index: ${countyData.risk}<br>
-      Kockázati szint: ${countyData.label}
+      Kockázati szint: ${countyData.label}<br>
+      Forrás: ${countyData.source}<br>
+      Kulcs: ${countyData.keyUsed}
     `;
 
     layer.bindPopup(popupHtml);
@@ -538,7 +553,8 @@ function initializeMap() {
 
         updateInfoPanel(
           displayName,
-          `Ellátási lánc sérülékenységi index: ${countyData.risk}. ${countyData.description}`
+          `Ellátási lánc sérülékenységi index: ${countyData.risk}. ${countyData.description} ` +
+          `[Nyers név: ${countyData.rawName || "nincs"} | Kulcs: ${countyData.keyUsed} | Forrás: ${countyData.source}]`
         );
       }
     });
