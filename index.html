@@ -154,6 +154,16 @@
           </p>
         </div>
 
+        <div class="map-toolbar">
+          <label for="risk-mode-select" class="filter-label">Térképi mutató:</label>
+          <select id="risk-mode-select" class="filter-select">
+            <option value="overall">Összesített sérülékenységi index</option>
+            <option value="import">Importfüggőség</option>
+            <option value="industry">Ipari kitettség</option>
+            <option value="logistics">Logisztikai kockázat</option>
+          </select>
+        </div>
+
         <div class="map-dashboard">
           <div class="map-panel">
             <div id="hungary-map"></div>
@@ -164,7 +174,7 @@
               <span class="map-info-label">Kiválasztott helyszín</span>
               <h3 id="location-name">Magyarország</h3>
               <p id="location-description">
-                Kattints egy jelölőre vagy megyepontra a térképen, és itt megjelenik az adott hely rövid értékelése.
+                Kattints egy jelölőre vagy megyére a térképen, és itt megjelenik az adott hely rövid értékelése.
               </p>
             </div>
 
@@ -177,6 +187,30 @@
                 <li>Kecskemét – járműipari integráció</li>
                 <li>Záhony – keleti logisztikai kapu</li>
               </ul>
+            </div>
+
+            <div class="map-info-card">
+              <span class="map-info-label">Legenda</span>
+
+              <div class="legend-item">
+                <span class="legend-color high"></span>
+                <span>Magas kockázat (75+)</span>
+              </div>
+
+              <div class="legend-item">
+                <span class="legend-color medium-high"></span>
+                <span>Közepesen magas kockázat (68–74)</span>
+              </div>
+
+              <div class="legend-item">
+                <span class="legend-color medium"></span>
+                <span>Közepes kockázat (60–67)</span>
+              </div>
+
+              <div class="legend-item">
+                <span class="legend-color low"></span>
+                <span>Alacsonyabb kockázat (0–59)</span>
+              </div>
             </div>
 
             <div class="map-info-card">
